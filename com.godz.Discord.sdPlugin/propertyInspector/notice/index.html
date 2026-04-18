@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-info-label text-center">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Notificações</span>
+    </div>
+
+    <div class="sdpi-info-label text-center text-muted text-sm">
+      A contagem de notificações aparecerá no botão.
+      Pressione o botão para reiniciar o contador.
+    </div>
+    <!-- Botão Sair movido para o final -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      statusDot: $('#statusDot'),
+      statusText: $('#statusText'),
+    };
+
+    const $propEvent = {
+      didReceiveSettings(data) {
+        $websocket.getGlobalSettings();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          $dom.statusDot.className = 'status-dot online';
+        }
+      }
+    };
+
+    $dom.logout.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+  </script>
+</body>
+</html>

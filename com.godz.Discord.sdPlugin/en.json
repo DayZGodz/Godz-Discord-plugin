@@ -1,0 +1,129 @@
+{
+  "Name": "Discord",
+  "Description": "Discord integration with advanced screen sharing",
+  "com.godz.discord.mute": {
+    "Name": "Mute",
+    "Tooltip": "Toggle Microphone Mute"
+  },
+  "com.godz.discord.deaf": {
+    "Name": "Deafen",
+    "Tooltip": "Toggle Deafen"
+  },
+  "com.godz.discord.voicechannel": {
+    "Name": "Voice Channel",
+    "Tooltip": "Join a voice channel"
+  },
+  "com.godz.discord.textchannel": {
+    "Name": "Text Channel",
+    "Tooltip": "Navigate to a text channel"
+  },
+  "com.godz.discord.notice": {
+    "Name": "Notifications",
+    "Tooltip": "Show Discord notifications"
+  },
+  "com.godz.discord.userVolume": {
+    "Name": "User Volume",
+    "Tooltip": "Control per-user volume"
+  },
+  "com.godz.discord.soundboard": {
+    "Name": "Soundboard",
+    "Tooltip": "Play soundboard sounds"
+  },
+  "com.godz.discord.setDevices": {
+    "Name": "Audio Devices",
+    "Tooltip": "Configure audio devices"
+  },
+  "com.godz.discord.pushToTalk": {
+    "Name": "Push to Talk",
+    "Tooltip": "Hold to talk"
+  },
+  "com.godz.discord.pushToMute": {
+    "Name": "Push to Mute",
+    "Tooltip": "Hold to mute"
+  },
+  "com.godz.discord.toggleVideo": {
+    "Name": "Toggle Video",
+    "Tooltip": "Toggle camera on/off"
+  },
+  "com.godz.discord.screenShare": {
+    "Name": "Screen Share",
+    "Tooltip": "Share screen with monitor/window selection"
+  },
+  "com.godz.discord.disconnect": {
+    "Name": "Disconnect",
+    "Tooltip": "Disconnect from voice channel"
+  },
+  "com.godz.discord.noiseSuppression": {
+    "Name": "Noise Suppression",
+    "Tooltip": "Toggle noise suppression"
+  },
+  "com.godz.discord.customStatus": {
+    "Name": "Custom Status",
+    "Tooltip": "Set custom Discord status"
+  },
+  "Category": "Discord",
+  "Localization": {
+    "Please start Discord": "Please start Discord",
+    "Save": "Save",
+    "Authorization": "Authorization",
+    "Server": "Server",
+    "Text Channel": "Text Channel",
+    "Device": "Device",
+    "Input": "Input",
+    "Output": "Output",
+    "Volume": "Volume",
+    "Voice Channel": "Voice Channel",
+    "Get ID": "Get ID",
+    "User": "User",
+    "Logout": "Logout",
+    "Ideal volume": "Ideal volume",
+    "Adjust unit": "Adjust unit",
+    "Icon style": "Icon style",
+    "Mute type": "Mute type",
+    "Mode": "Mode",
+    "Settings": "Settings",
+    "Set input device": "Set input device",
+    "Set output device": "Set output device",
+    "Set both": "Set both",
+    "Adjust": "Adjust",
+    "Mute": "Mute",
+    "Dynamic vertical": "Dynamic vertical",
+    "Dynamic horizontal": "Dynamic horizontal",
+    "Static": "Static",
+    "Search": "Search",
+    "Unmute": "Unmute",
+    "Mute/Unmute": "Mute/Unmute",
+    "Too many connections": "Too many connections, please restart Discord",
+    "CLIENT ID": "CLIENT ID",
+    "CLIENT SECRET": "CLIENT SECRET",
+    "Refresh": "Refresh",
+    "Screen": "Screen",
+    "Window": "Window",
+    "Select screen": "Select screen to share",
+    "Select window": "Select window to share",
+    "Monitor": "Monitor",
+    "Application": "Application",
+    "Preferred screen": "Preferred screen",
+    "Share type": "Share type",
+    "Full screen": "Full screen",
+    "Application window": "Application window",
+    "Disconnect": "Disconnect",
+    "Noise suppression": "Noise suppression",
+    "Custom status": "Custom status",
+    "Status text": "Status text",
+    "Emoji": "Emoji",
+    "Online": "Online",
+    "Idle": "Idle",
+    "Do Not Disturb": "Do Not Disturb",
+    "Invisible": "Invisible",
+    "View the tutorial": "View the tutorial",
+    "DEV URL": "https://discord.com/developers/applications",
+    "Authorization successful": "Authorization successful",
+    "Authorization completed": "Authorization completed successfully!",
+    "Closing window in": "Closing window in",
+    "seconds": "seconds...",
+    "Close window": "Close window",
+    "Connection failed": "Connection failed {0} times",
+    "Unconnected": "Unconnected"
+  }
+}

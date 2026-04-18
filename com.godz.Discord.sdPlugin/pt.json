@@ -1,0 +1,129 @@
+{
+  "Name": "Discord",
+  "Description": "Integração Discord com compartilhamento de tela avançado",
+  "com.godz.discord.mute": {
+    "Name": "Silenciar",
+    "Tooltip": "Alternar silenciamento do microfone"
+  },
+  "com.godz.discord.deaf": {
+    "Name": "Ensurdecer",
+    "Tooltip": "Alternar ensurdecimento"
+  },
+  "com.godz.discord.voicechannel": {
+    "Name": "Canal de Voz",
+    "Tooltip": "Entrar em um canal de voz"
+  },
+  "com.godz.discord.textchannel": {
+    "Name": "Canal de Texto",
+    "Tooltip": "Navegar para um canal de texto"
+  },
+  "com.godz.discord.notice": {
+    "Name": "Notificações",
+    "Tooltip": "Exibir notificações do Discord"
+  },
+  "com.godz.discord.userVolume": {
+    "Name": "Volume do Usuário",
+    "Tooltip": "Controlar volume por usuário"
+  },
+  "com.godz.discord.soundboard": {
+    "Name": "Soundboard",
+    "Tooltip": "Reproduzir sons do soundboard"
+  },
+  "com.godz.discord.setDevices": {
+    "Name": "Dispositivos de Áudio",
+    "Tooltip": "Configurar dispositivos de áudio"
+  },
+  "com.godz.discord.pushToTalk": {
+    "Name": "Pressionar para Falar",
+    "Tooltip": "Segure para falar"
+  },
+  "com.godz.discord.pushToMute": {
+    "Name": "Pressionar para Silenciar",
+    "Tooltip": "Segure para silenciar"
+  },
+  "com.godz.discord.toggleVideo": {
+    "Name": "Alternar Câmera",
+    "Tooltip": "Ligar/desligar câmera"
+  },
+  "com.godz.discord.screenShare": {
+    "Name": "Compartilhar Tela",
+    "Tooltip": "Compartilhar tela com seleção de monitor/janela"
+  },
+  "com.godz.discord.disconnect": {
+    "Name": "Desconectar",
+    "Tooltip": "Desconectar do canal de voz"
+  },
+  "com.godz.discord.noiseSuppression": {
+    "Name": "Supressão de Ruído",
+    "Tooltip": "Alternar supressão de ruído"
+  },
+  "com.godz.discord.customStatus": {
+    "Name": "Status Personalizado",
+    "Tooltip": "Definir status personalizado do Discord"
+  },
+  "Category": "Discord",
+  "Localization": {
+    "Please start Discord": "Por favor, inicie o Discord",
+    "Save": "Salvar",
+    "Authorization": "Autorização",
+    "Server": "Servidor",
+    "Text Channel": "Canal de Texto",
+    "Device": "Dispositivo",
+    "Input": "Entrada",
+    "Output": "Saída",
+    "Volume": "Volume",
+    "Voice Channel": "Canal de Voz",
+    "Get ID": "Obter ID",
+    "User": "Usuário",
+    "Logout": "Sair",
+    "Ideal volume": "Volume ideal",
+    "Adjust unit": "Unidade de ajuste",
+    "Icon style": "Estilo do ícone",
+    "Mute type": "Tipo de silenciamento",
+    "Mode": "Modo",
+    "Settings": "Configurações",
+    "Set input device": "Configurar dispositivo de entrada",
+    "Set output device": "Configurar dispositivo de saída",
+    "Set both": "Configurar ambos",
+    "Adjust": "Ajustar",
+    "Mute": "Silenciar",
+    "Dynamic vertical": "Dinâmico vertical",
+    "Dynamic horizontal": "Dinâmico horizontal",
+    "Static": "Estático",
+    "Search": "Pesquisar",
+    "Unmute": "Ativar microfone",
+    "Mute/Unmute": "Silenciar/Ativar",
+    "Too many connections": "Muitas conexões, por favor reinicie o Discord",
+    "CLIENT ID": "CLIENT ID",
+    "CLIENT SECRET": "CLIENT SECRET",
+    "Refresh": "Atualizar",
+    "Screen": "Tela",
+    "Window": "Janela",
+    "Select screen": "Selecione a tela para compartilhar",
+    "Select window": "Selecione a janela para compartilhar",
+    "Monitor": "Monitor",
+    "Application": "Aplicativo",
+    "Preferred screen": "Tela preferida",
+    "Share type": "Tipo de compartilhamento",
+    "Full screen": "Tela inteira",
+    "Application window": "Janela do aplicativo",
+    "Disconnect": "Desconectar",
+    "Noise suppression": "Supressão de ruído",
+    "Custom status": "Status personalizado",
+    "Status text": "Texto do status",
+    "Emoji": "Emoji",
+    "Online": "Online",
+    "Idle": "Ausente",
+    "Do Not Disturb": "Não Perturbe",
+    "Invisible": "Invisível",
+    "View the tutorial": "Ver o tutorial",
+    "DEV URL": "https://discord.com/developers/applications",
+    "Authorization successful": "Autorização bem-sucedida",
+    "Authorization completed": "Autorização concluída com sucesso!",
+    "Closing window in": "Fechando janela em",
+    "seconds": "segundos...",
+    "Close window": "Fechar janela",
+    "Connection failed": "Falha na conexão {0} vezes",
+    "Unconnected": "Desconectado"
+  }
+}

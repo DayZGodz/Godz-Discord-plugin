@@ -1,0 +1,212 @@
+{
+  "Actions": [
+    {
+      "Icon": "static/icon/1.png",
+      "Name": "Silenciar Microfone",
+      "DisableAutomaticStates": true,
+      "KeyboardSupport": true,
+      "Controllers": ["Keypad", "Knob"],
+      "States": [
+        { "Image": "static/icon/Image1.png", "Name": "Unmute" },
+        { "Image": "static/icon/Image2.png", "Name": "Mute" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Toggle microphone mute",
+      "UUID": "com.godz.discord.mute",
+      "PropertyInspectorPath": "propertyInspector/mute/index.html"
+    },
+    {
+      "Icon": "static/icon/2.png",
+      "Name": "Silenciar",
+      "DisableAutomaticStates": true,
+      "KeyboardSupport": true,
+      "Controllers": ["Keypad", "Knob"],
+      "States": [
+        { "Image": "static/icon/Image3.png", "Name": "Undeafen" },
+        { "Image": "static/icon/Image4.png", "Name": "Deafen" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Toggle deafen",
+      "UUID": "com.godz.discord.deaf",
+      "PropertyInspectorPath": "propertyInspector/deaf/index.html"
+    },
+    {
+      "Icon": "static/icon/3.png",
+      "Name": "Canal de Voz",
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/Image5.png", "Name": "Enter" },
+        { "Image": "static/icon/Image5.png", "Name": "Leave" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Join or leave a voice channel",
+      "UUID": "com.godz.discord.voicechannel",
+      "PropertyInspectorPath": "propertyInspector/voicechannel/index.html"
+    },
+    {
+      "Icon": "static/icon/4.png",
+      "Name": "Canal de Texto",
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/Image7.png", "Name": "Enter" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Navigate to a text channel",
+      "UUID": "com.godz.discord.textchannel",
+      "PropertyInspectorPath": "propertyInspector/textchannel/index.html"
+    },
+    {
+      "Icon": "static/icon/5.png",
+      "Name": "Notificações",
+      "KeyboardSupport": true,
+      "States": [
+        { "FontSize": "12", "TitleAlignment": "center", "Image": "static/icon/Image9.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Show Discord notifications",
+      "UUID": "com.godz.discord.notice",
+      "PropertyInspectorPath": "propertyInspector/notice/index.html"
+    },
+    {
+      "Icon": "static/icon/6.png",
+      "Name": "Volume do Usuário",
+      "KeyboardSupport": true,
+      "Controllers": ["Keypad", "Knob"],
+      "States": [
+        { "FontSize": "12", "TitleAlignment": "bottom", "Image": "static/icon/Image10.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Control user volume",
+      "UUID": "com.godz.discord.userVolume",
+      "PropertyInspectorPath": "propertyInspector/userVolume/index.html"
+    },
+    {
+      "Icon": "static/icon/8.png",
+      "Name": "Soundboard",
+      "KeyboardSupport": true,
+      "States": [
+        { "FontSize": "9", "TitleAlignment": "bottom", "Image": "static/icon/Image12.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Play soundboard sounds",
+      "UUID": "com.godz.discord.soundboard",
+      "PropertyInspectorPath": "propertyInspector/soundboard/index.html"
+    },
+    {
+      "Icon": "static/icon/9.png",
+      "Name": "Dispositivos de Áudio",
+      "KeyboardSupport": true,
+      "States": [
+        { "FontSize": "12", "TitleAlignment": "center", "Image": "static/icon/Image13.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Set audio input/output devices",
+      "UUID": "com.godz.discord.setDevices",
+      "PropertyInspectorPath": "propertyInspector/setDevices/index.html"
+    },
+    {
+      "Icon": "static/icon/10.png",
+      "Name": "Alternar Câmera",
+      "DisableAutomaticStates": true,
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/Image15.png", "Name": "Video On" },
+        { "Image": "static/icon/Image15.png", "Name": "Video Off" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Toggle camera on/off",
+      "UUID": "com.godz.discord.toggleVideo",
+      "PropertyInspectorPath": "propertyInspector/toggleVideo/index.html"
+    },
+    {
+      "Icon": "static/icon/11.png",
+      "Name": "Compartilhar Tela",
+      "DisableAutomaticStates": true,
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/Image16.png", "Name": "Not Sharing" },
+        { "Image": "static/icon/Image16.png", "Name": "Sharing" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Screen share with monitor/window selection",
+      "UUID": "com.godz.discord.screenShare",
+      "PropertyInspectorPath": "propertyInspector/screenShare/index.html"
+    },
+    {
+      "Icon": "static/icon/alert.png",
+      "Name": "Desconectar",
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/alert.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Disconnect from voice channel",
+      "UUID": "com.godz.discord.disconnect",
+      "PropertyInspectorPath": "propertyInspector/disconnect/index.html"
+    },
+    {
+      "Icon": "static/icon/2.png",
+      "Name": "Supressão de Ruído",
+      "DisableAutomaticStates": true,
+      "KeyboardSupport": true,
+      "States": [
+        { "Image": "static/icon/Image3.png", "Name": "Enabled" },
+        { "Image": "static/icon/Image4.png", "Name": "Disabled" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Toggle noise suppression",
+      "UUID": "com.godz.discord.noiseSuppression",
+      "PropertyInspectorPath": "propertyInspector/noiseSuppression/index.html"
+    },
+    {
+      "Icon": "static/icon/4.png",
+      "Name": "Abrir Link",
+      "KeyboardSupport": true,
+      "States": [
+        { "FontSize": "9", "TitleAlignment": "bottom", "Image": "static/icon/Image7.png" }
+      ],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Tooltip": "Open last link from a text channel",
+      "UUID": "com.godz.discord.openLink",
+      "PropertyInspectorPath": "propertyInspector/openLink/index.html"
+    }
+  ],
+  "SDKVersion": 1,
+  "ApplicationsToMonitor": {
+    "mac": ["Discord"],
+    "windows": ["Discord.exe"]
+  },
+  "Author": "Godz",
+  "Name": "Discord",
+  "Icon": "static/favicon",
+  "CodePathWin": "plugin/index.mjs",
+  "CodePathMac": "plugin/index.mjs",
+  "Description": "Discord integration with advanced screen sharing",
+  "Category": "Discord",
+  "CategoryIcon": "static/favicon",
+  "Version": "1.0.0",
+  "URL": "",
+  "OS": [
+    { "Platform": "mac", "MinimumVersion": "10.11" },
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Software": {
+    "MinimumVersion": "3.10.0.0"
+  },
+  "Nodejs": {
+    "Version": "20"
+  }
+}

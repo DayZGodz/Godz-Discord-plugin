@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-heading">Configurações</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Modo</div>
+      <select class="sdpi-item-value" id="modeSelect">
+        <option value="both">Configurar ambos</option>
+        <option value="input">Configurar dispositivo de entrada</option>
+        <option value="output">Configurar dispositivo de saída</option>
+      </select>
+    </div>
+
+    <div class="sdpi-item" id="inputDeviceRow">
+      <div class="sdpi-item-label">Entrada</div>
+      <select class="sdpi-item-value" id="inputDevice">
+        <option value="">--</option>
+      </select>
+    </div>
+
+    <div class="sdpi-item" id="outputDeviceRow">
+      <div class="sdpi-item-label">Saída</div>
+      <select class="sdpi-item-value" id="outputDevice">
+        <option value="">--</option>
+      </select>
+    </div>
+    <!-- Botão Sair movido para o final -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      modeSelect: $('#modeSelect'),
+      inputDevice: $('#inputDevice'),
+      outputDevice: $('#outputDevice'),
+      inputDeviceRow: $('#inputDeviceRow'),
+      outputDeviceRow: $('#outputDeviceRow'),
+    };
+
+    function updateDeviceVisibility() {
+      const mode = $dom.modeSelect.value;
+      $dom.inputDeviceRow.style.display = (mode === 'both' || mode === 'input') ? 'flex' : 'none';
+      $dom.outputDeviceRow.style.display = (mode === 'both' || mode === 'output') ? 'flex' : 'none';
+    }
+
+    const $propEvent = {
+      didReceiveSettings(data) {
+        $websocket.getGlobalSettings();
+        if ($settings.mode) $dom.modeSelect.value = $settings.mode;
+        updateDeviceVisibility();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          $websocket.sendToPlugin({ command: 'getDevices' });
+        }
+      },
+      sendToPropertyInspector(payload) {
+        if (payload.command === 'devices') {
+          const { availableInputDevices, availableOutputDevices } = payload.data;
+          if (availableInputDevices) {
+            $.populateSelect($dom.inputDevice, availableInputDevices, 'id', 'name', $settings.inputDeviceId);
+          }
+          if (availableOutputDevices) {
+            $.populateSelect($dom.outputDevice, availableOutputDevices, 'id', 'name', $settings.outputDeviceId);
+          }
+        }
+      }
+    };
+
+    $dom.modeSelect.addEventListener('change', () => {
+      $settings.mode = $dom.modeSelect.value;
+      updateDeviceVisibility();
+    });
+
+    $dom.inputDevice.addEventListener('change', () => {
+      $settings.inputDeviceId = $dom.inputDevice.value;
+    });
+
+    $dom.outputDevice.addEventListener('change', () => {
+      $settings.outputDeviceId = $dom.outputDevice.value;
+    });
+
+    $dom.logout.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+  </script>
+</body>
+</html>

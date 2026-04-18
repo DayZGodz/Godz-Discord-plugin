@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+  <style>
+    .info-box {
+      background: var(--bg-tertiary, #2b2d31);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 8px 12px;
+      font-size: 12px;
+      color: var(--discord-muted, #b5bac1);
+      line-height: 1.5;
+    }
+    .info-box .icon { font-size: 20px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+      <div class="sdpi-heading">Compartilhar Tela</div>
+
+    <div class="info-box">
+      <div class="icon">🖥️</div>
+      Pressione o botao para abrir o seletor de tela do Discord.
+      Voce escolhe qual tela ou janela compartilhar diretamente no Discord.
+    </div>
+      <!-- Botão Sair movido para o final -->
+      <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+        <div class="sdpi-item-label">Sair</div>
+        <button class="sdpi-item-value" id="logout">Sair</button>
+      </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+    };
+
+    const $propEvent = {
+      didReceiveSettings() {
+        $websocket.getGlobalSettings();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+        }
+      },
+      sendToPropertyInspector() {}
+    };
+
+    $dom.logout.addEventListener('click', () => {
+      if ($websocket && typeof $websocket.sendToPlugin === 'function') {
+        $websocket.sendToPlugin({ command: 'logout' });
+      }
+      $websocket.setGlobalSettings({ clientId: '', clientSecret: '', accessToken: '' });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    (function () {
+      function _capture() {
+        window.__godzPendingConnectArgs = arguments;
+      }
+      window.connectElgatoStreamDeckSocket = _capture;
+      window.connectSocket = _capture;
+      window.connectStreamDeckSocket = _capture;
+      window.connectRiseModeStreamDeckSocket = _capture;
+    })();
+  </script>
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-heading">Abrir Link</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Servidor</div>
+      <select class="sdpi-item-value" id="guildSelect">
+        <option value="">--</option>
+      </select>
+    </div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Canal de Texto</div>
+      <select class="sdpi-item-value" id="channelSelect">
+        <option value="">--</option>
+      </select>
+    </div>
+
+    <div class="sdpi-item" style="padding: 6px 16px;">
+      <div style="color: #72767d; font-size: 11px; line-height: 1.4;">
+        Ao pressionar o botão, o plugin abre no navegador o último link encontrado nas mensagens do canal selecionado.
+      </div>
+    </div>
+
+    <div class="sdpi-heading">Bot Token</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Token do Bot</div>
+      <input type="password" class="sdpi-item-value" id="botToken"
+             placeholder="Cole o token do Bot aqui">
+    </div>
+
+    <div class="sdpi-item" style="padding: 4px 12px;">
+      <details style="font-size: 11px; color: var(--discord-muted, #b5bac1); width: 100%;">
+        <summary style="cursor: pointer;">Como criar um Bot?</summary>
+        <ol style="margin: 6px 0; padding-left: 18px; line-height: 1.6;">
+          <li>Acesse <b>discord.com/developers/applications</b></li>
+          <li>Selecione seu aplicativo (mesmo do Client ID)</li>
+          <li>Va em <b>Bot</b> no menu lateral</li>
+          <li>Clique em <b>Reset Token</b> e copie o token</li>
+          <li>Ative <b>Message Content Intent</b> em Privileged Intents</li>
+          <li>Va em <b>OAuth2 &gt; URL Generator</b>, marque <b>bot</b></li>
+          <li>Em Bot Permissions marque <b>Read Message History</b></li>
+          <li>Copie a URL gerada e abra no navegador para adicionar o bot ao servidor</li>
+        </ol>
+      </details>
+    </div>
+    <!-- Botão Sair movido para o final -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    let _retryTimer = null;
+    let _connectHintTimer = null;
+    let _hasData = false;
+    let _textChannelsByGuild = {};
+    let _guildsData = [];
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      guildSelect: $('#guildSelect'),
+      channelSelect: $('#channelSelect'),
+      botToken: $('#botToken'),
+    };
+
+    function showStatus(msg) {
+      if (!$dom.statusMsg) {
+        $dom.statusMsg = document.createElement('div');
+        $dom.statusMsg.className = 'sdpi-item';
+        $dom.statusMsg.style.cssText = 'color: #faa61a; font-size: 12px; text-align: center; padding: 8px;';
+        $dom.main.insertBefore($dom.statusMsg, $dom.main.firstChild);
+      }
+      $dom.statusMsg.textContent = msg;
+      $dom.statusMsg.style.display = msg ? '' : 'none';
+    }
+
+    function requestData() {
+      if (_retryTimer) clearTimeout(_retryTimer);
+      sendToPluginSafe({ command: 'getGuilds' });
+    }
+
+    function scheduleConnectingHint() {
+      if (_connectHintTimer) clearTimeout(_connectHintTimer);
+      _connectHintTimer = setTimeout(() => {
+        if (!_hasData) showStatus('Conectando ao Discord...');
+      }, 800);
+    }
+
+    function sendToPluginSafe(payload) {
+      if (!$websocket) return;
+      if (typeof $websocket.sendToPlugin === 'function') {
+        $websocket.sendToPlugin(payload);
+        return;
+      }
+      if ($websocket.readyState === 1) {
+        $websocket.send(JSON.stringify({
+          event: 'sendToPlugin',
+          action: $action || 'com.godz.discord.openLink',
+          context: $context || $uuid,
+          payload
+        }));
+      }
+    }
+
+    function _wrapTitle(str, row, num) {
+      if (!row || !str) return str || '';
+      let newStr = '', nowRow = 1;
+      const arr = str.split('');
+      arr.forEach((ch, i) => {
+        if (nowRow < row && i >= nowRow * num) { nowRow++; newStr += '\n'; }
+        if (nowRow <= row && i < nowRow * num) { newStr += ch; }
+      });
+      if (arr.length > row * num) newStr = newStr.slice(0, -1) + '..';
+      return newStr;
+    }
+
+    async function _updateGuildIcon(guildId) {
+      if (!$websocket || !guildId) return;
+      const guild = _guildsData.find(g => g.id === guildId);
+      if (!guild || !guild.icon_url) return;
+      try {
+        const resp = await fetch(guild.icon_url);
+        if (!resp.ok) return;
+        const blob = await resp.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) $websocket.setImage(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      } catch (e) { console.error('Failed to fetch guild icon:', e); }
+    }
+
+    const $propEvent = {
+      didReceiveSettings() {
+        $websocket.getGlobalSettings();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          // Restore bot token from global settings
+          if (settings.botToken && $dom.botToken) {
+            $dom.botToken.value = settings.botToken;
+          }
+          _hasData = $dom.guildSelect && $dom.guildSelect.options && $dom.guildSelect.options.length > 1;
+          if (!_hasData) {
+            showStatus('');
+            scheduleConnectingHint();
+          } else {
+            showStatus('');
+          }
+          requestData();
+        }
+      },
+      sendToPropertyInspector(payload) {
+        if (payload.command === 'guilds') {
+          _hasData = Array.isArray(payload.data) && payload.data.length > 0;
+          _guildsData = payload.data || [];
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          if (_retryTimer) clearTimeout(_retryTimer);
+          $.populateSelect($dom.guildSelect, payload.data, 'id', 'name', $settings.guildId);
+          if ($settings.guildId) {
+            $.populateSelect(
+              $dom.channelSelect,
+              _textChannelsByGuild[$settings.guildId] || [],
+              'id', 'name', $settings.channelId
+            );
+          }
+        }
+        if (payload.command === 'guildChannels') {
+          _hasData = true;
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          _textChannelsByGuild = payload.data || {};
+          if ($settings.guildId) {
+            $.populateSelect(
+              $dom.channelSelect,
+              _textChannelsByGuild[$settings.guildId] || [],
+              'id', 'name', $settings.channelId
+            );
+          }
+        }
+        if (payload.command === 'channels') {
+          _hasData = true;
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          $.populateSelect($dom.channelSelect, payload.data, 'id', 'name', $settings.channelId);
+        }
+        if (payload.command === 'status') {
+          if (payload.data && payload.data.authenticated) {
+            if (_connectHintTimer) clearTimeout(_connectHintTimer);
+            showStatus('');
+            requestData();
+          } else {
+            showStatus('Aguardando o Discord...');
+            _retryTimer = setTimeout(requestData, 3000);
+          }
+        }
+        if (payload.command === 'error') {
+          showStatus('Erro: ' + (payload.data || 'Desconhecido'));
+          _retryTimer = setTimeout(requestData, 5000);
+        }
+      }
+    };
+
+    $dom.guildSelect.addEventListener('change', () => {
+      const guildId = $dom.guildSelect.value;
+      $settings.guildId = guildId;
+      $.populateSelect(
+        $dom.channelSelect,
+        _textChannelsByGuild[guildId] || [],
+        'id', 'name', $settings.channelId
+      );
+      _updateGuildIcon(guildId);
+    });
+
+    $dom.channelSelect.addEventListener('change', () => {
+      const channelId = $dom.channelSelect.value;
+      $settings.channelId = channelId;
+      const channels = _textChannelsByGuild[$settings.guildId] || [];
+      const ch = channels.find(c => c.id === channelId);
+      if (ch) {
+        $settings.channelName = ch.name;
+        if ($websocket) $websocket.setTitle(_wrapTitle(ch.name, 3, 10));
+      }
+      showStatus('');
+    });
+
+    $dom.logout.addEventListener('click', () => {
+      sendToPluginSafe({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+
+    // Save bot token to global settings on change
+    if ($dom.botToken) {
+      $dom.botToken.addEventListener('change', () => {
+        const token = $dom.botToken.value.trim();
+        $websocket.setGlobalSettings({ botToken: token });
+      });
+    }
+  </script>
+</body>
+</html>

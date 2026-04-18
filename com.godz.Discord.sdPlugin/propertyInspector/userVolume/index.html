@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-item" id="logoutdiv" style="display: none">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+
+    <div class="sdpi-heading">Volume do Usuário</div>
+
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Usuário</div>
+      <select class="sdpi-item-value" id="userSelect">
+        <option value="">--</option>
+      </select>
+    </div>
+
+
+
+
+
+
+
+    <div class="sdpi-heading">Configuração do Knob</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Passo do volume</div>
+      <div class="sdpi-item-value">
+        <input type="number" id="knobStep" min="1" max="100" value="5" style="width:60px">
+        <span style="font-size:11px;color:#999;margin-left:6px">(1-100)</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      userSelect: $('#userSelect'),
+      modeSelect: $('#modeSelect'),
+      volumeRow: $('#volumeRow'),
+      adjustRow: $('#adjustRow'),
+      volumeSlider: $('#volumeSlider'),
+      volumeValue: $('#volumeValue'),
+      adjustSelect: $('#adjustSelect'),
+      iconStyle: $('#iconStyle'),
+      refreshBtn: $('#refreshBtn'),
+      knobStep: $('#knobStep'),
+    };
+
+    function showModeOptions() {
+      const mode = $dom.modeSelect.value;
+      $dom.volumeRow.style.display = mode === 'volume' ? 'flex' : 'none';
+      $dom.adjustRow.style.display = mode === 'adjust' ? 'flex' : 'none';
+    }
+
+    const $propEvent = {
+      didReceiveSettings(data) {
+        $websocket.getGlobalSettings();
+        // Restore saved settings
+        if ($settings.mode) $dom.modeSelect.value = $settings.mode;
+        if ($settings.idealVolume) $dom.volumeSlider.value = $settings.idealVolume;
+        if ($settings.adjustUnit) $dom.adjustSelect.value = $settings.adjustUnit;
+        if ($settings.iconStyle) $dom.iconStyle.value = $settings.iconStyle;
+        if ($settings.knobStep) $dom.knobStep.value = $settings.knobStep;
+        $dom.volumeValue.textContent = ($settings.idealVolume || 100) + '%';
+        showModeOptions();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          $websocket.sendToPlugin({ command: 'getVoiceUsers' });
+        }
+      },
+      sendToPropertyInspector(payload) {
+        if (payload.command === 'voiceUsers') {
+          $.populateSelect($dom.userSelect, payload.data, 'id', 'username', $settings.userId);
+          // Exibe avatar do usuário selecionado
+          const selectedId = $dom.userSelect.value;
+          const user = payload.data.find(u => u.id === selectedId);
+          const avatarDiv = document.getElementById('userAvatarDiv');
+          if (avatarDiv) {
+            avatarDiv.innerHTML = '';
+            if (user && user.avatar) {
+              const url = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`;
+              const img = document.createElement('img');
+              img.src = url;
+              img.alt = user.username || 'avatar';
+              img.style = 'width:48px;height:48px;border-radius:50%;margin:8px 0;';
+              avatarDiv.appendChild(img);
+            }
+          }
+        }
+      }
+    };
+
+    $dom.userSelect.addEventListener('change', () => {
+      $settings.userId = $dom.userSelect.value;
+      // Envia setSettings imediatamente, mas NÃO atualiza avatar/select aqui
+      if (window.$websocket && window.$settings) {
+        window.$websocket.setSettings($settings);
+      } else if (window.sendToPlugin) {
+        window.sendToPlugin({ command: 'setSettings', settings: { userId: $settings.userId } });
+      }
+      // A interface só será atualizada ao receber didReceiveSettings do plugin
+    });
+
+    $dom.modeSelect.addEventListener('change', () => {
+      $settings.mode = $dom.modeSelect.value;
+      showModeOptions();
+    });
+
+    $dom.volumeSlider.addEventListener('input', () => {
+      const val = $dom.volumeSlider.value;
+      $dom.volumeValue.textContent = val + '%';
+      $settings.idealVolume = parseInt(val, 10);
+    });
+
+    $dom.adjustSelect.addEventListener('change', () => {
+      $settings.adjustUnit = parseInt($dom.adjustSelect.value, 10);
+    });
+
+    $dom.iconStyle.addEventListener('change', () => {
+      $settings.iconStyle = $dom.iconStyle.value;
+    });
+
+    $dom.knobStep.addEventListener('change', () => {
+      const val = Math.max(1, Math.min(100, parseInt($dom.knobStep.value, 10) || 5));
+      $dom.knobStep.value = val;
+      $settings.knobStep = val;
+    });
+
+    $dom.refreshBtn.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'getVoiceUsers' });
+    });
+
+    $dom.logout.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+  </script>
+</body>
+</html>

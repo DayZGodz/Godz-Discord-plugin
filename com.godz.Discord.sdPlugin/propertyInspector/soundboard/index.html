@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    (function () {
+      function _capture() {
+        window.__godzPendingConnectArgs = arguments;
+      }
+      window.connectElgatoStreamDeckSocket = _capture;
+      window.connectSocket = _capture;
+      window.connectStreamDeckSocket = _capture;
+      window.connectRiseModeStreamDeckSocket = _capture;
+    })();
+  </script>
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+  <style>
+    #soundsContainer {
+      text-align: center;
+      width: 80%;
+      margin: 0 auto;
+    }
+    .guild-section {
+      margin-bottom: 18px;
+    }
+    .guild-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #b5bac1;
+      margin-bottom: 8px;
+      text-align: left;
+      padding-left: 2px;
+    }
+    .guild-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0;
+    }
+    .soundItem {
+      width: 40%;
+      background-color: rgba(0,0,0,0.2);
+      margin: 5px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      color: #dcddde;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .soundItem:hover {
+      background-color: #616161;
+    }
+    .soundItem.active {
+      background-color: #616161;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-heading">Soundboard</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Atualizar</div>
+      <button class="sdpi-item-value" id="refreshBtn">Atualizar</button>
+    </div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Pesquisar</div>
+      <input type="text" class="sdpi-item-value" id="searchInput" placeholder="Pesquisar">
+    </div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Servidor</div>
+      <select class="sdpi-item-value" id="guildSelect"></select>
+    </div>
+    <div id="soundsContainer"></div>
+
+    <!-- Botão Sair movido para o final absoluto -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    let allSoundsByGuild = {}; // { guildId: { guildName, sounds[] } }
+
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      searchInput: $('#searchInput'),
+      refreshBtn: $('#refreshBtn'),
+      soundsContainer: $('#soundsContainer'),
+      guildSelect: $('#guildSelect'),
+    };
+
+    function renderGuildSelect() {
+      $dom.guildSelect.innerHTML = '';
+      const guildIds = Object.keys(allSoundsByGuild);
+      if (guildIds.length === 0) {
+        $dom.guildSelect.innerHTML = '<option value="">Carregando...</option>';
+        return;
+      }
+      for (const gid of guildIds) {
+        const group = allSoundsByGuild[gid];
+        const opt = document.createElement('option');
+        opt.value = gid;
+        opt.textContent = group.guildName || gid;
+        $dom.guildSelect.appendChild(opt);
+      }
+      // Sempre manter todos os guilds no dropdown, mesmo após troca
+      if ($settings.guildId && $dom.guildSelect.querySelector(`[value='${$settings.guildId}']`)) {
+        $dom.guildSelect.value = $settings.guildId;
+      } else {
+        $dom.guildSelect.selectedIndex = 0;
+        $settings.guildId = $dom.guildSelect.value;
+      }
+    }
+
+    let soundButtonsDisabled = false;
+    function setSoundButtonsDisabled(disabled) {
+      soundButtonsDisabled = disabled;
+      document.querySelectorAll('.sound-btn').forEach(btn => {
+        btn.style.pointerEvents = disabled ? 'none' : '';
+        btn.style.opacity = disabled ? '0.5' : '';
+      });
+    }
+
+    function renderSounds(query) {
+      const q = (query || '').toLowerCase();
+      $dom.soundsContainer.innerHTML = '';
+
+      const guildId = $dom.guildSelect.value;
+      if (!guildId || !allSoundsByGuild[guildId]) {
+        $dom.soundsContainer.innerHTML = '<div style="text-align:center;color:#72767d;padding:16px;font-size:12px;">Selecione um servidor</div>';
+        return;
+      }
+      const group = allSoundsByGuild[guildId];
+      const sounds = q
+        ? group.sounds.filter(s => s.name.toLowerCase().includes(q))
+        : group.sounds;
+      if (sounds.length === 0) {
+        $dom.soundsContainer.innerHTML = '<div style="text-align:center;color:#72767d;padding:16px;font-size:12px;">Nenhum som encontrado</div>';
+        return;
+      }
+      const section = document.createElement('div');
+      section.className = 'guild-section';
+      const header = document.createElement('div');
+      header.className = 'guild-name';
+      header.textContent = group.guildName || guildId;
+      section.appendChild(header);
+      const grid = document.createElement('div');
+      grid.className = 'guild-grid';
+      for (const s of sounds) {
+        const soundDiv = document.createElement('div');
+        soundDiv.className = 'soundItem' + ($settings.soundId === s.sound_id ? ' active' : '');
+        soundDiv.textContent = (s.emoji_name ? s.emoji_name + ' ' : '') + s.name;
+        soundDiv.title = 'Definir este som no botão';
+        soundDiv.style.userSelect = 'none';
+        soundDiv.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (soundButtonsDisabled) return;
+          setSoundButtonsDisabled(true);
+          document.querySelectorAll('.soundItem').forEach(b => b.classList.remove('active'));
+          soundDiv.classList.add('active');
+          // Save the full sound object for playback + individual fields for display
+          $settings.soundObj = { ...s };
+          $settings.soundId = s.sound_id;
+          $settings.soundName = s.name;
+          $settings.emojiName = s.emoji_name || '';
+          $settings.emojiId = s.emoji_id || '';
+          $settings.guildId = guildId;
+          if ($websocket) {
+            $websocket.setSettings($settings);
+          }
+          _updateLCD(s);
+        });
+        grid.appendChild(soundDiv);
+      }
+      section.appendChild(grid);
+      $dom.soundsContainer.appendChild(section);
+      setSoundButtonsDisabled(soundButtonsDisabled); // aplica estado inicial
+    }
+
+    const $propEvent = {
+      didReceiveSettings(data) {
+        setSoundButtonsDisabled(false); // reabilita os botões após sincronização
+        $websocket.getGlobalSettings();
+        // Atualizar guildSelect se settings mudou
+        if ($settings.guildId && $dom.guildSelect.querySelector(`[value='${$settings.guildId}']`)) {
+          $dom.guildSelect.value = $settings.guildId;
+        }
+        renderSounds($dom.searchInput.value);
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+        }
+      },
+      sendToPropertyInspector(payload) {
+        if (payload.command === 'allSounds') {
+          allSoundsByGuild = payload.data || {};
+          renderGuildSelect();
+          renderSounds($dom.searchInput.value);
+        }
+      }
+    };
+
+    $dom.searchInput.addEventListener('input', () => {
+      renderSounds($dom.searchInput.value);
+    });
+    $dom.searchInput.addEventListener('keyup', () => {
+      renderSounds($dom.searchInput.value);
+    });
+    $dom.guildSelect.addEventListener('change', () => {
+      $settings.guildId = $dom.guildSelect.value;
+      // Limpar som selecionado ao trocar de servidor
+      delete $settings.soundId;
+      delete $settings.soundObj;
+      delete $settings.soundName;
+      delete $settings.emojiName;
+      delete $settings.emojiId;
+      if ($websocket) {
+        $websocket.setSettings($settings);
+      }
+      renderSounds($dom.searchInput.value);
+    });
+
+    $dom.refreshBtn.addEventListener('click', () => {
+      allSoundsByGuild = {};
+      $dom.soundsContainer.innerHTML = '<div style="text-align:center;color:#72767d;padding:16px;font-size:12px;">Carregando sons...</div>';
+      $websocket.sendToPlugin({ command: 'refresh' });
+    });
+
+    // Render emoji to canvas image for LCD display
+    function _emojiToImage(emoji, size) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Black background
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, size, size);
+        // Draw emoji centered
+        ctx.font = `${Math.floor(size * 0.65)}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(emoji, size / 2, size / 2);
+        resolve(canvas.toDataURL('image/png'));
+      });
+    }
+
+    // Update LCD display directly from PI (bypass backend since didReceiveSettings is broken)
+    async function _updateLCD(sound) {
+      if (!$websocket) return;
+      // Set title to sound name
+      $websocket.setTitle(sound.name || '');
+
+      let imageDataUri = null;
+
+      // Custom emoji: fetch from Discord CDN
+      if (sound.emoji_id) {
+        try {
+          const url = `https://cdn.discordapp.com/emojis/${sound.emoji_id}.webp?size=96`;
+          const resp = await fetch(url);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            imageDataUri = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) { console.error('Failed to fetch custom emoji:', e); }
+      }
+      // Unicode emoji: render on canvas
+      else if (sound.emoji_name) {
+        try {
+          imageDataUri = await _emojiToImage(sound.emoji_name, 144);
+        } catch (e) { console.error('Failed to render emoji:', e); }
+      }
+
+      if (imageDataUri) {
+        $websocket.setImage(imageDataUri);
+        // Cache in settings so backend can use it on willAppear
+        $settings.emojiImage = imageDataUri;
+      }
+    }
+
+    $dom.logout.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-info-label text-center">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Alternar Silenciamento</span>
+    </div>
+
+    <div class="sdpi-heading">Áudio</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Passo do volume</div>
+      <div class="sdpi-item-value">
+        <input type="number" id="knobStep" min="1" max="100" value="5" style="width:60px">
+        <span style="font-size:11px;color:#999;margin-left:6px">(1-100)</span>
+      </div>
+    </div>
+    <!-- Botão Sair movido para o final absoluto -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      statusDot: $('#statusDot'),
+      statusText: $('#statusText'),
+      knobStep: $('#knobStep'),
+    };
+
+    const $propEvent = {
+      didReceiveSettings(data) {
+        $websocket.getGlobalSettings();
+        if ($settings.knobStep) $dom.knobStep.value = $settings.knobStep;
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          $dom.statusDot.className = 'status-dot online';
+          $dom.statusText.textContent = 'Conectado';
+        }
+      }
+    };
+
+    $dom.knobStep.addEventListener('change', () => {
+      const val = Math.max(1, Math.min(100, parseInt($dom.knobStep.value, 10) || 5));
+      $dom.knobStep.value = val;
+      $settings.knobStep = val;
+    });
+
+    $dom.logout.addEventListener('click', () => {
+      $websocket.sendToPlugin({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+  </script>
+</body>
+</html>

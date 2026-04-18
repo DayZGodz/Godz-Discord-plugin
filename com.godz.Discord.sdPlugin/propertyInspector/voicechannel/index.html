@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    // Capture host callback as early as possible. action.js consumes this later.
+    (function () {
+      function _capture() {
+        window.__godzPendingConnectArgs = arguments;
+      }
+      window.connectElgatoStreamDeckSocket = _capture;
+      window.connectSocket = _capture;
+      window.connectStreamDeckSocket = _capture;
+      window.connectRiseModeStreamDeckSocket = _capture;
+    })();
+  </script>
+  <link rel="stylesheet" href="../../static/css/sdpi.css">
+</head>
+<body>
+  <div class="sdpi-wrapper" style="display: none">
+    <div class="sdpi-heading">Canal de Voz</div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Servidor</div>
+      <select class="sdpi-item-value" id="guildSelect">
+        <option value="">--</option>
+      </select>
+    </div>
+
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Canal de Voz</div>
+      <select class="sdpi-item-value" id="channelSelect">
+        <option value="">--</option>
+      </select>
+    </div>
+
+    <!-- Botão Sair movido para o final -->
+    <div class="sdpi-item" id="logoutdiv" style="display: none; margin-top: 24px;">
+      <div class="sdpi-item-label">Sair</div>
+      <button class="sdpi-item-value" id="logout">Sair</button>
+    </div>
+  </div>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/action.js"></script>
+  <script>
+    const $local = true, $back = false;
+    let _retryTimer = null;
+    let _connectHintTimer = null;
+    let _hasVoiceData = false;
+    let _voiceChannelsByGuild = {};
+    let _guildsData = []; // Store full guild data with icon_url
+    const $dom = {
+      main: $('.sdpi-wrapper'),
+      logout: $('#logout'),
+      logoutdiv: $('#logoutdiv'),
+      guildSelect: $('#guildSelect'),
+      channelSelect: $('#channelSelect'),
+      // ...existing code...
+    };
+
+    function showStatus(msg) {
+      if (!$dom.statusMsg) {
+        $dom.statusMsg = document.createElement('div');
+        $dom.statusMsg.className = 'sdpi-item';
+        $dom.statusMsg.style.cssText = 'color: #faa61a; font-size: 12px; text-align: center; padding: 8px;';
+        $dom.main.insertBefore($dom.statusMsg, $dom.main.firstChild);
+      }
+      $dom.statusMsg.textContent = msg;
+      $dom.statusMsg.style.display = msg ? '' : 'none';
+    }
+
+    function requestData() {
+      if (_retryTimer) clearTimeout(_retryTimer);
+      sendToPluginSafe({ command: 'getGuilds' });
+    }
+
+    function scheduleConnectingHint() {
+      if (_connectHintTimer) clearTimeout(_connectHintTimer);
+      _connectHintTimer = setTimeout(() => {
+        if (!_hasVoiceData) showStatus('Conectando ao Discord...');
+      }, 800);
+    }
+
+    function sendToPluginSafe(payload) {
+      if (!$websocket) return;
+
+      if (typeof $websocket.sendToPlugin === 'function') {
+        $websocket.sendToPlugin(payload);
+        return;
+      }
+
+      if ($websocket.readyState === 1) {
+        $websocket.send(JSON.stringify({
+          event: 'sendToPlugin',
+          action: $action || 'com.godz.discord.voicechannel',
+          context: $context || $uuid,
+          payload
+        }));
+      }
+    }
+
+    const $propEvent = {
+      didReceiveSettings() {
+        $websocket.getGlobalSettings();
+      },
+      didReceiveGlobalSettings({ settings }) {
+        if (!settings.clientId || !settings.clientSecret) {
+          openAuthorization();
+        } else {
+          $dom.main.style.display = '';
+          $dom.logoutdiv.style.display = 'flex';
+          _hasVoiceData = $dom.guildSelect && $dom.guildSelect.options && $dom.guildSelect.options.length > 1;
+          if (!_hasVoiceData) {
+            showStatus('');
+            scheduleConnectingHint();
+          } else {
+            showStatus('');
+          }
+          requestData();
+        }
+      },
+      sendToPropertyInspector(payload) {
+        if (payload.command === 'guilds') {
+          _hasVoiceData = Array.isArray(payload.data) && payload.data.length > 0;
+          _guildsData = payload.data || [];
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          if (_retryTimer) clearTimeout(_retryTimer);
+          $.populateSelect($dom.guildSelect, payload.data, 'id', 'name', $settings.guildId);
+          if ($settings.guildId) {
+            $.populateSelect(
+              $dom.channelSelect,
+              _voiceChannelsByGuild[$settings.guildId] || [],
+              'id',
+              'name',
+              $settings.channelId
+            );
+          }
+        }
+        if (payload.command === 'guildChannels') {
+          _hasVoiceData = true;
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          _voiceChannelsByGuild = payload.data || {};
+          if ($settings.guildId) {
+            $.populateSelect(
+              $dom.channelSelect,
+              _voiceChannelsByGuild[$settings.guildId] || [],
+              'id',
+              'name',
+              $settings.channelId
+            );
+          }
+        }
+        if (payload.command === 'channels') {
+          _hasVoiceData = true;
+          if (_connectHintTimer) clearTimeout(_connectHintTimer);
+          showStatus('');
+          $.populateSelect($dom.channelSelect, payload.data, 'id', 'name', $settings.channelId);
+        }
+        if (payload.command === 'status') {
+          if (payload.data && payload.data.authenticated) {
+            if (_connectHintTimer) clearTimeout(_connectHintTimer);
+            showStatus('');
+            requestData();
+          } else {
+            showStatus('Aguardando o Discord...');
+            _retryTimer = setTimeout(requestData, 3000);
+          }
+        }
+        if (payload.command === 'error') {
+          showStatus('Erro: ' + (payload.data || 'Desconhecido'));
+          _retryTimer = setTimeout(requestData, 5000);
+        }
+      }
+    };
+
+    // Fetch guild icon and set as LCD background
+    async function _updateGuildIcon(guildId) {
+      if (!$websocket || !guildId) return;
+      const guild = _guildsData.find(g => g.id === guildId);
+      if (!guild || !guild.icon_url) return;
+      try {
+        const resp = await fetch(guild.icon_url);
+        if (!resp.ok) return;
+        const blob = await resp.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) $websocket.setImage(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      } catch (e) { console.error('Failed to fetch guild icon:', e); }
+    }
+
+    // Wrap title text for LCD (same as Mirabox: row lines, num chars per line)
+    function _wrapTitle(str, row, num) {
+      if (!row || !str) return str || '';
+      let newStr = '', nowRow = 1;
+      const arr = str.split('');
+      arr.forEach((ch, i) => {
+        if (nowRow < row && i >= nowRow * num) { nowRow++; newStr += '\n'; }
+        if (nowRow <= row && i < nowRow * num) { newStr += ch; }
+      });
+      if (arr.length > row * num) newStr = newStr.slice(0, -1) + '..';
+      return newStr;
+    }
+
+    $dom.guildSelect.addEventListener('change', () => {
+      const guildId = $dom.guildSelect.value;
+      $settings.guildId = guildId;
+      $.populateSelect(
+        $dom.channelSelect,
+        _voiceChannelsByGuild[guildId] || [],
+        'id',
+        'name',
+        $settings.channelId
+      );
+      // Update LCD icon instantly
+      _updateGuildIcon(guildId);
+    });
+
+    $dom.channelSelect.addEventListener('change', () => {
+      const channelId = $dom.channelSelect.value;
+      $settings.channelId = channelId;
+      // Save channel name and update LCD title instantly
+      const channels = _voiceChannelsByGuild[$settings.guildId] || [];
+      const ch = channels.find(c => c.id === channelId);
+      if (ch) {
+        $settings.channelName = ch.name;
+        // Set title wrapped (3 rows, 10 chars per row) — shown at bottom of LCD over the icon
+        if ($websocket) $websocket.setTitle(_wrapTitle(ch.name, 3, 10));
+      }
+      showStatus('');
+    });
+
+    $dom.logout.addEventListener('click', () => {
+      sendToPluginSafe({ command: 'logout' });
+      $websocket.setGlobalSettings({
+        clientId: '', clientSecret: '', accessToken: ''
+      });
+    });
+
+    // ...existing code...
+  </script>
+</body>
+</html>

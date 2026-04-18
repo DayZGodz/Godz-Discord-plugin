@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Authorization</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1e1f22;
+      color: #f2f3f5;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      padding: 16px;
+    }
+    .auth-container {
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo svg {
+      width: 48px;
+      height: 48px;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 4px;
+      color: #f2f3f5;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #949ba4;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #b5bac1;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px 12px;
+      background: #1e1f22;
+      border: 1px solid #3f4147;
+      border-radius: 4px;
+      color: #f2f3f5;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: #5865f2;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 10px;
+      background: #5865f2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover {
+      background: #4752c4;
+    }
+    .btn-primary:disabled {
+      background: #4752c4;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .link {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #00a8fc;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+    .info-box {
+      background: #2b2d31;
+      border-left: 4px solid #5865f2;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      color: #b5bac1;
+      line-height: 1.5;
+    }
+    .info-box a {
+      color: #00a8fc;
+      text-decoration: none;
+    }
+    .info-box a:hover {
+      text-decoration: underline;
+    }
+    .steps {
+      font-size: 11px;
+      color: #949ba4;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .steps li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="#5865f2">
+        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286z"/>
+      </svg>
+    </div>
+
+    <h2 id="title"></h2>
+    <p class="subtitle" id="subtitle"></p>
+
+    <div class="info-box" id="infoBox"></div>
+
+    <ol class="steps" id="steps"></ol>
+
+    <div class="form-group">
+      <label>CLIENT ID</label>
+      <input type="text" id="clientId" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label>CLIENT SECRET</label>
+      <input type="password" id="clientSecret" autocomplete="off">
+        <button id="show-help-btn" style="width:100%;margin:10px 0 0 0;padding:8px 0;background:#232428;color:#00a8fc;border:none;border-radius:4px;font-size:12px;cursor:pointer;">Como obter o Client ID/Secret?</button>
+        <div id="help-section" style="display:none;background:#232428;border-radius:4px;padding:10px 12px;margin-top:8px;font-size:11px;color:#b5bac1;">
+          <ol style="margin-bottom:8px;">
+            <li>Acesse <a href="https://discord.com/developers/applications" id="open-dev-portal" target="_blank" style="color:#00a8fc;text-decoration:underline;">Discord Developer Portal</a></li>
+            <li>Crie um Novo Aplicativo</li>
+            <li>Vá em configurações OAuth2</li>
+            <li>Adicione a URL de redirecionamento: <strong>http://127.0.0.1:26432/callback</strong></li>
+            <li>Copie o Client ID e Client Secret abaixo</li>
+          </ol>
+          <span style="font-size:10px;color:#949ba4;">Dica: Clique no link acima para abrir o portal em uma nova aba.</span>
+        </div>
+    </div>
+
+    <button class="btn-primary" id="authorizeBtn" disabled></button>
+
+    <a class="link" id="tutorialLink" href="#"></a>
+  </div>
+
+  <script>
+        // Ajuda oculta/mostra
+        document.getElementById('show-help-btn').onclick = function() {
+          const help = document.getElementById('help-section');
+          help.style.display = help.style.display === 'none' ? '' : 'none';
+        };
+        // Link abre em nova aba
+        document.getElementById('open-dev-portal').onclick = function(e) {
+          e.preventDefault();
+          window.open('https://discord.com/developers/applications', '_blank');
+        };
+    const i18n = {
+      pt: {
+        title: 'Autorização Discord',
+        subtitle: 'Conecte seu Aplicativo Discord Developer',
+        infoBox: 'Para usar este plugin, você precisa de um Aplicativo Discord Developer.<br><a href="#" id="devLink">Crie um em discord.com/developers</a>',
+        steps: [
+          'Vá ao Discord Developer Portal',
+          'Crie um Novo Aplicativo',
+          'Vá em configurações OAuth2',
+          'Adicione a URL de redirecionamento: <strong>http://127.0.0.1:26432/callback</strong>',
+          'Copie o Client ID e Client Secret abaixo'
+        ],
+        clientIdPlaceholder: 'Digite o Client ID',
+        clientSecretPlaceholder: 'Digite o Client Secret',
+        authorizeBtn: 'Autorizar',
+        tutorialLink: 'Ver o tutorial'
+      },
+      en: {
+        title: 'Discord Authorization',
+        subtitle: 'Connect your Discord Developer Application',
+        infoBox: 'To use this plugin, you need a Discord Developer Application.<br><a href="#" id="devLink">Create one at discord.com/developers</a>',
+        steps: [
+          'Go to Discord Developer Portal',
+          'Create a New Application',
+          'Go to OAuth2 settings',
+          'Add redirect URL: <strong>http://127.0.0.1:26432/callback</strong>',
+          'Copy Client ID and Client Secret below'
+        ],
+        clientIdPlaceholder: 'Enter Client ID',
+        clientSecretPlaceholder: 'Enter Client Secret',
+        authorizeBtn: 'Authorize',
+        tutorialLink: 'View the tutorial'
+      }
+    };
+
+    // Detect language from URL param or parent window
+    function detectLang() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('lang')) return params.get('lang').startsWith('pt') ? 'pt' : 'en';
+      try {
+        if (window.parent !== window && window.parent.$info?.application?.language) {
+          return window.parent.$info.application.language.startsWith('pt') ? 'pt' : 'en';
+        }
+      } catch (e) {}
+      return navigator.language?.startsWith('pt') ? 'pt' : 'en';
+    }
+
+    const lang = detectLang();
+    const t = i18n[lang] || i18n.en;
+
+    // Apply translations
+    document.getElementById('title').textContent = t.title;
+    document.getElementById('subtitle').textContent = t.subtitle;
+    document.getElementById('infoBox').innerHTML = t.infoBox;
+    document.getElementById('steps').innerHTML = t.steps.map(s => `<li>${s}</li>`).join('');
+    document.getElementById('clientId').placeholder = t.clientIdPlaceholder;
+    document.getElementById('clientSecret').placeholder = t.clientSecretPlaceholder;
+    document.getElementById('authorizeBtn').textContent = t.authorizeBtn;
+    document.getElementById('tutorialLink').textContent = t.tutorialLink;
+
+    const clientIdInput = document.getElementById('clientId');
+    const clientSecretInput = document.getElementById('clientSecret');
+    const authorizeBtn = document.getElementById('authorizeBtn');
+
+    // Validate inputs
+    function validate() {
+      authorizeBtn.disabled = !(clientIdInput.value.trim() && clientSecretInput.value.trim());
+    }
+    clientIdInput.addEventListener('input', validate);
+    clientSecretInput.addEventListener('input', validate);
+
+    // Authorize
+    authorizeBtn.addEventListener('click', () => {
+      const clientId = clientIdInput.value.trim();
+      const clientSecret = clientSecretInput.value.trim();
+      if (!clientId || !clientSecret) return;
+
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'authorize',
+          clientId,
+          clientSecret
+        }, '*');
+      }
+    });
+
+    // Dev portal link
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'devLink') {
+        e.preventDefault();
+        try {
+          if (window.parent !== window && window.parent.$websocket) {
+            window.parent.$websocket.openUrl('https://discord.com/developers/applications');
+          } else {
+            window.open('https://discord.com/developers/applications', '_blank');
+          }
+        } catch (err) {
+          window.open('https://discord.com/developers/applications', '_blank');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

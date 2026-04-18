@@ -1,0 +1,14 @@
+{
+  "name": "com.godz.discord",
+  "version": "1.0.0",
+  "description": "Discord plugin for Stream Deck with advanced screen sharing",
+  "type": "module",
+  "main": "plugin/index.mjs",
+  "scripts": {
+    "start": "node plugin/index.mjs"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

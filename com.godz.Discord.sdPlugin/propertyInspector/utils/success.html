@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1e1f22;
+      color: #f2f3f5;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container { text-align: center; padding: 40px; }
+    .icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 16px;
+      background: #23a559;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon svg { width: 36px; height: 36px; fill: #fff; }
+    h1 { font-size: 20px; font-weight: 600; color: #f2f3f5; margin-bottom: 6px; }
+    p { font-size: 14px; color: #b5bac1; margin-bottom: 20px; }
+    .countdown { font-size: 13px; color: #949ba4; }
+    #timer { color: #5865f2; font-weight: 600; }
+    .close-btn {
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: #4e5058;
+      color: #f2f3f5;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .close-btn:hover { background: #6d6f78; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    </div>
+    <h1>Authorization successful</h1>
+    <p>Authorization completed successfully!</p>
+    <div class="countdown">Closing window in <span id="timer">5</span> seconds...</div>
+    <button class="close-btn" onclick="window.close()">Close window</button>
+  </div>
+  <script>
+    let t = 5;
+    const el = document.getElementById('timer');
+    const iv = setInterval(() => {
+      if (--t <= 0) { clearInterval(iv); window.close(); }
+      el.textContent = t;
+    }, 1000);
+  </script>
+</body>
+</html>
